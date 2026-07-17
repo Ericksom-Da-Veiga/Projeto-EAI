@@ -9,6 +9,7 @@ var usersRouter = require('./routes/users');
 var corpusRouter = require('./routes/corpus');
 var trainingsetRouter = require('./routes/trainingset');
 var trainRouter = require('./routes/train');
+var textMiningRouter = require('./routes/textmining');
 
 var app = express();
 
@@ -26,6 +27,7 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/corpus', corpusRouter);
 app.use('/trainingset', trainingsetRouter);
+app.use('/train', trainRouter);
 app.use('/train', trainRouter);
 
 // catch 404 and forward to error handler

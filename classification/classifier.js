@@ -1,84 +1,233 @@
 const preprocessing = require("./preprocessing");
-const counting = require("./counting");
 
-function calculateCosineSimilarity(vectorA, vectorB) {
-  const dotProduct = vectorA.reduce((sum, val, i) => sum + val * vectorB[i], 0);
-  const normA = Math.sqrt(vectorA.reduce((sum, val) => sum + val * val, 0));
-  const normB = Math.sqrt(vectorB.reduce((sum, val) => sum + val * val, 0));
+function tokenToString(token) {
+  if (Array.isArray(token)) {
+    return token.join(" ");
+  }
 
-  if (normA === 0 || normB === 0) return 0;
-  return dotProduct / (normA * normB);
+  return String(token);
 }
 
-function cosineSimilarity(text, classesData) {
-  const results = classesData.map((classData) => {
-    const preprocessed = preprocessing.preprocessText(text, [1, 2]);
-    const tokens = preprocessed.tokens.flatMap((g) => g.tokens);
+function extractTerms(text) {
+  const processed = preprocessing.preprocessText(text || "", [1, 2]);
 
-    const vector = classData.vocabulary.map((term) => {
-      const tf = counting.tf(tokens, term);
-      const idfData = classData.idf.find((i) => i.name === term);
-      const idf = idfData ? idfData.idf : 0;
-      return tf * idf;
+  const terms = processed.tokens.flatMap((group) =>
+    group.tokens.map(tokenToString),
+  );
+
+  return {
+    originalText: processed.originalText,
+    cleanedText: processed.cleanedText,
+    preprocessedText: processed.preprocessedText,
+    terms,
+  };
+}
+
+function buildModel(
+  documents,
+  classes = ["fake", "true"],
+  maxFeatures = 2000,
+) {
+  const totalDocuments = documents.length;
+
+  const classData = {};
+
+  classes.forEach((label) => {
+    classData[label] = {
+      documentCount: 0,
+      termCounts: {},
+      totalTerms: 0,
+    };
+  });
+
+  const globalTermCounts = {};
+  const documentFrequency = {};
+
+  documents.forEach((document) => {
+    const label = document.label;
+
+    if (!classData[label]) {
+      return;
+    }
+
+    classData[label].documentCount++;
+
+    const extracted = extractTerms(document.text);
+    const uniqueTerms = new Set(extracted.terms);
+
+    extracted.terms.forEach((term) => {
+      classData[label].termCounts[term] =
+        (classData[label].termCounts[term] || 0) + 1;
+
+      globalTermCounts[term] =
+        (globalTermCounts[term] || 0) + 1;
     });
 
-    const classVector =
-      classData.representativeVector || new Array(vector.length).fill(0);
-
-    return {
-      label: classData.label,
-      similarity: calculateCosineSimilarity(vector, classVector),
-    };
+    uniqueTerms.forEach((term) => {
+      documentFrequency[term] =
+        (documentFrequency[term] || 0) + 1;
+    });
   });
 
-  return results.sort((a, b) => b.similarity - a.similarity)[0].label;
+  const selectedVocabulary = Object.keys(globalTermCounts)
+    .map((term) => {
+      const df = documentFrequency[term] || 1;
+      const idf =
+        totalDocuments === 0
+          ? 0
+          : Math.log(totalDocuments / df);
+
+      return {
+        term,
+        occurrences: globalTermCounts[term],
+        df,
+        idf,
+        score: globalTermCounts[term] * idf,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxFeatures);
+
+  const vocabulary = selectedVocabulary.map(
+    (feature) => feature.term,
+  );
+
+  const vocabularySet = new Set(vocabulary);
+
+  /*
+   * Mantém apenas as características selecionadas
+   * dentro de cada classe.
+   */
+  classes.forEach((label) => {
+    const selectedCounts = {};
+    let totalSelectedTerms = 0;
+
+    Object.entries(classData[label].termCounts).forEach(
+      ([term, count]) => {
+        if (vocabularySet.has(term)) {
+          selectedCounts[term] = count;
+          totalSelectedTerms += count;
+        }
+      },
+    );
+
+    classData[label].termCounts = selectedCounts;
+    classData[label].totalTerms = totalSelectedTerms;
+  });
+
+  return {
+    classes,
+    totalDocuments,
+    vocabulary,
+    selectedFeatures: selectedVocabulary,
+    classData,
+  };
 }
 
-function probabilisticClassification(text, classesData) {
-  const preprocessed = preprocessing.preprocessText(text, [1, 2]);
-  const tokens = preprocessed.tokens.flatMap((g) => g.tokens);
+/**
+ * Converte os scores logarítmicos em percentagens.
+ */
+function scoresToProbabilities(scores) {
+  const values = Object.values(scores);
 
-  const results = classesData.map((classData) => {
-    // b. Obter prior P(w)
-    const prior = classData.prior;
+  if (values.length === 0) {
+    return {};
+  }
 
-    // a. Calcular P(W | C)
-    // Numerador: importância do termo na classe (sum of tfidf for term in class)
-    // Denominador: importância total da classe (sum of all tfidf in class)
+  const maximum = Math.max(...values);
 
-    // Assumindo que classData.vectorSums contém os termos com seus valores agregados
-    const totalImportance =
-      classData.vectorSums.unigram.reduce((sum, term) => sum + term.tfidf, 0) +
-      classData.vectorSums.bigram.reduce((sum, term) => sum + term.tfidf, 0);
+  const exponentials = {};
 
-    const logProb = tokens.reduce((acc, token) => {
-      const termData = [
-        ...classData.vectorSums.unigram,
-        ...classData.vectorSums.bigram,
-      ].find((t) => t.name === token);
-
-      const termImportance = termData ? termData.tfidf : 0;
-      // Laplace smoothing: (count + 1) / (total + vocabSize)
-      const prob =
-        (termImportance + 1) /
-        (totalImportance +
-          (classData.vectorSums.unigram.length +
-            classData.vectorSums.bigram.length));
-      return acc + Math.log(prob);
-    }, 0);
-
-    // c. Multiplicar (ou somar logs) prior * P(W|C)
-    return {
-      label: classData.label,
-      score: Math.log(prior) + logProb,
-    };
+  Object.entries(scores).forEach(([label, score]) => {
+    exponentials[label] = Math.exp(score - maximum);
   });
 
-  return results.sort((a, b) => b.score - a.score)[0].label;
+  const total = Object.values(exponentials).reduce(
+    (sum, value) => sum + value,
+    0,
+  );
+
+  const probabilities = {};
+
+  Object.entries(exponentials).forEach(([label, value]) => {
+    probabilities[label] =
+      total === 0 ? 0 : value / total;
+  });
+
+  return probabilities;
+}
+
+/**
+ * Classifica um texto como fake ou true.
+ */
+function classify(text, model) {
+  const extracted = extractTerms(text);
+  const vocabularySet = new Set(model.vocabulary);
+
+  const terms = extracted.terms.filter((term) =>
+    vocabularySet.has(term),
+  );
+
+  const scores = {};
+  const vocabularySize = model.vocabulary.length;
+
+  model.classes.forEach((label) => {
+    const data = model.classData[label];
+
+    const prior =
+      model.totalDocuments === 0
+        ? 0
+        : data.documentCount / model.totalDocuments;
+
+    let score =
+      prior > 0
+        ? Math.log(prior)
+        : Number.NEGATIVE_INFINITY;
+
+    terms.forEach((term) => {
+      const count = data.termCounts[term] || 0;
+
+      // Suavização de Laplace
+      const probability =
+        (count + 1) /
+        (data.totalTerms + vocabularySize);
+
+      score += Math.log(probability);
+    });
+
+    scores[label] = score;
+  });
+
+  const probabilities = scoresToProbabilities(scores);
+
+  const ranking = model.classes
+    .map((label) => ({
+      label,
+      score: scores[label],
+      probability: probabilities[label] || 0,
+    }))
+    .sort((a, b) => b.score - a.score);
+
+  return {
+    predictedLabel: ranking[0]
+      ? ranking[0].label
+      : null,
+    confidence: ranking[0]
+      ? ranking[0].probability
+      : 0,
+    ranking,
+    processed: {
+      originalText: extracted.originalText,
+      cleanedText: extracted.cleanedText,
+      preprocessedText: extracted.preprocessedText,
+      recognizedTerms: terms,
+      recognizedTermsCount: terms.length,
+    },
+  };
 }
 
 module.exports = {
-  cosineSimilarity,
-  calculateCosineSimilarity,
-  probabilisticClassification,
+  extractTerms,
+  buildModel,
+  classify,
 };

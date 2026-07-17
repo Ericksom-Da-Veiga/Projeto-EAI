@@ -1,0 +1,24 @@
+<<<<<<< HEAD
+# Pastas de dependências
+node_modules/
+
+# Arquivos pesados que você mencionou
+Fake.csv
+True.csv
+news.json
+
+# Logs e arquivos de sistema
+*.log
+.DS_Store
+=======
+# Ignorar um ficheiro específico
+config.json
+
+node_modules/
+build/
+
+*.log
+*.tmp
+
+logs/*.txt
+>>>>>>> d55cf16 (first commit)

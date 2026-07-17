@@ -1,6 +1,5 @@
 const trainingSetDatabase = require("../database/trainingset");
 const preprocessing = require("./preprocessing");
-const counting = require("./counting");
 const bagOfWords = require("./bagOfWords");
 const featureSelection = require("./featureSelection");
 const fs = require("fs");
@@ -8,11 +7,56 @@ const path = require("path");
 
 function calculatePriorProbability(label, totalDocuments) {
   const documents = trainingSetDatabase.getTrainingSet(label);
+
+  if (totalDocuments === 0) {
+    return 0;
+  }
+
   return documents.length / totalDocuments;
+}
+
+function calculateVectorSums(
+  vocabulary,
+  documentsWithVectors,
+  ngramType,
+  idfVector,
+) {
+  return vocabulary
+    .map((termName) => {
+      const terms = documentsWithVectors.map((doc) => {
+        const occurrencesData = doc.vectors[ngramType].occurrences.find(
+          (item) => item.name === termName,
+        );
+
+        const tfData = doc.vectors[ngramType].tf.find(
+          (item) => item.name === termName,
+        );
+
+        const idfData = idfVector.find(
+          (item) => item.name === termName,
+        );
+
+        return {
+          name: termName,
+          occurrences: occurrencesData
+            ? occurrencesData.occurrences
+            : 0,
+          tf: tfData ? tfData.tf : 0,
+          idf: idfData ? idfData.idf : 0,
+        };
+      });
+
+      return bagOfWords.sumVector(terms);
+    })
+    .filter(Boolean);
 }
 
 function train(classes = ["fake", "true"], nValues = [1, 2]) {
   const result = [];
+
+  const allDocuments = classes.flatMap((label) =>
+    trainingSetDatabase.getTrainingSet(label),
+  );
 
   classes.forEach((label) => {
     const documents = trainingSetDatabase.getTrainingSet(label);
@@ -21,71 +65,91 @@ function train(classes = ["fake", "true"], nValues = [1, 2]) {
     let bigramVocabulary = [];
 
     const processedDocuments = documents.map((doc) => {
-      const preprocessed = preprocessing.preprocessText(doc.text, nValues);
+      const text = doc.text || "";
+      const preprocessed = preprocessing.preprocessText(text, nValues);
 
-      const unigramTokens = preprocessed.tokens.find(
+      const unigramGroup = preprocessed.tokens.find(
         (item) => item.n === 1,
-      ).tokens;
-      const bigramTokens = preprocessed.tokens.find(
+      );
+
+      const bigramGroup = preprocessed.tokens.find(
         (item) => item.n === 2,
-      ).tokens;
+      );
+
+      const unigramTokens = unigramGroup
+        ? unigramGroup.tokens
+        : [];
+
+      const bigramTokens = bigramGroup
+        ? bigramGroup.tokens
+        : [];
 
       unigramVocabulary = bagOfWords.addUniqueTerms(
         unigramVocabulary,
         unigramTokens,
       );
+
       bigramVocabulary = bagOfWords.addUniqueTerms(
         bigramVocabulary,
         bigramTokens,
       );
 
-      const tokensWithTf = preprocessed.tokens.map((tokenGroup) => {
-        return {
-          n: tokenGroup.n,
-          tokens: tokenGroup.tokens,
-          tf: calculateTfForTokens(tokenGroup.tokens),
-        };
-      });
-
       return {
         id: doc.id,
-        title: doc.title,
+        title: doc.title || "",
+        text: text,
         label: doc.label,
         preprocessing: {
           originalText: preprocessed.originalText,
           cleanedText: preprocessed.cleanedText,
           preprocessedText: preprocessed.preprocessedText,
-          tokens: tokensWithTf,
+          tokens: preprocessed.tokens,
         },
       };
     });
 
-    // Call sumVector for each term of the bag of words
-
     const allUnigramTokens = processedDocuments.map((doc) => {
-      return doc.preprocessing.tokens.find((item) => item.n === 1).tokens;
+      const group = doc.preprocessing.tokens.find(
+        (item) => item.n === 1,
+      );
+
+      return group ? group.tokens : [];
     });
 
     const allBigramTokens = processedDocuments.map((doc) => {
-      return doc.preprocessing.tokens.find((item) => item.n === 2).tokens;
+      const group = doc.preprocessing.tokens.find(
+        (item) => item.n === 2,
+      );
+
+      return group ? group.tokens : [];
     });
 
     const unigramIdfVector = bagOfWords.idfVector(
       unigramVocabulary,
       allUnigramTokens,
     );
+
     const bigramIdfVector = bagOfWords.idfVector(
       bigramVocabulary,
       allBigramTokens,
     );
 
     const documentsWithVectors = processedDocuments.map((doc) => {
-      const unigramTokens = doc.preprocessing.tokens.find(
+      const unigramGroup = doc.preprocessing.tokens.find(
         (item) => item.n === 1,
-      ).tokens;
-      const bigramTokens = doc.preprocessing.tokens.find(
+      );
+
+      const bigramGroup = doc.preprocessing.tokens.find(
         (item) => item.n === 2,
-      ).tokens;
+      );
+
+      const unigramTokens = unigramGroup
+        ? unigramGroup.tokens
+        : [];
+
+      const bigramTokens = bigramGroup
+        ? bigramGroup.tokens
+        : [];
 
       const unigramBinaryVector = bagOfWords.binaryVector(
         unigramVocabulary,
@@ -93,11 +157,12 @@ function train(classes = ["fake", "true"], nValues = [1, 2]) {
         doc.id,
       );
 
-      const unigramOccurrencesVector = bagOfWords.numberOfOccurrencesVector(
-        unigramVocabulary,
-        unigramTokens,
-        doc.id,
-      );
+      const unigramOccurrencesVector =
+        bagOfWords.numberOfOccurrencesVector(
+          unigramVocabulary,
+          unigramTokens,
+          doc.id,
+        );
 
       const unigramTfVector = bagOfWords.tfVector(
         unigramVocabulary,
@@ -116,11 +181,12 @@ function train(classes = ["fake", "true"], nValues = [1, 2]) {
         doc.id,
       );
 
-      const bigramOccurrencesVector = bagOfWords.numberOfOccurrencesVector(
-        bigramVocabulary,
-        bigramTokens,
-        doc.id,
-      );
+      const bigramOccurrencesVector =
+        bagOfWords.numberOfOccurrencesVector(
+          bigramVocabulary,
+          bigramTokens,
+          doc.id,
+        );
 
       const bigramTfVector = bagOfWords.tfVector(
         bigramVocabulary,
@@ -152,55 +218,51 @@ function train(classes = ["fake", "true"], nValues = [1, 2]) {
       };
     });
 
-    const unigramVectorSums = unigramVocabulary.map((termName) => {
-      const terms = documentsWithVectors.map((doc) => {
-        const occurrences = doc.vectors.unigram.occurrences.find(
-          (v) => v.name === termName,
-        );
-        const tf = doc.vectors.unigram.tf.find((v) => v.name === termName);
-        const idf = unigramIdfVector.find((v) => v.name === termName);
+    const unigramVectorSums = calculateVectorSums(
+      unigramVocabulary,
+      documentsWithVectors,
+      "unigram",
+      unigramIdfVector,
+    );
 
-        return {
-          name: termName,
-          occurrences: occurrences.occurrences,
-          tf: tf.tf,
-          idf: idf.idf,
-        };
-      });
-      return bagOfWords.sumVector(terms);
-    });
+    const bigramVectorSums = calculateVectorSums(
+      bigramVocabulary,
+      documentsWithVectors,
+      "bigram",
+      bigramIdfVector,
+    );
 
-    const bigramVectorSums = bigramVocabulary.map((termName) => {
-      // ... (as before)
-    });
+    const kUnigram = Math.max(
+      1,
+      Math.floor(unigramVocabulary.length * 0.2),
+    );
 
-    // 7. Apply feature selection
-    const kUnigram = Math.floor(unigramVocabulary.length * 0.2);
-    const kBigram = Math.floor(bigramVocabulary.length * 0.2);
+    const kBigram = Math.max(
+      1,
+      Math.floor(bigramVocabulary.length * 0.2),
+    );
 
     const bestUnigrams = featureSelection.selectKBest(
       unigramVectorSums,
       kUnigram,
       "tfidf",
     );
+
     const bestBigrams = featureSelection.selectKBest(
       bigramVectorSums,
       kBigram,
       "tfidf",
     );
 
-    // 9. Calculate and store Prior Probability
-    const allLabels = ["fake", "true"]; // Assume these are the labels
-    const allDocuments = allLabels.flatMap((l) =>
-      trainingSetDatabase.getTrainingSet(l),
+    const prior = calculatePriorProbability(
+      label,
+      allDocuments.length,
     );
-    const prior = calculatePriorProbability(label, allDocuments.length);
 
-    result.push({
+    const classResult = {
       label: label,
       prior: prior,
       totalDocuments: documentsWithVectors.length,
-      // ...
       vocabulary: {
         unigram: unigramVocabulary,
         bigram: bigramVocabulary,
@@ -218,13 +280,19 @@ function train(classes = ["fake", "true"], nValues = [1, 2]) {
         unigram: bestUnigrams,
         bigram: bestBigrams,
       },
-    });
+    };
 
-    // 8. Gravar em ficheiro
-    const outputPath = path.join(__dirname, `training_results_${label}.json`);
+    result.push(classResult);
+
+    const outputPath = path.join(
+      __dirname,
+      `training_results_${label}.json`,
+    );
+
     fs.writeFileSync(
       outputPath,
-      JSON.stringify(result[result.length - 1], null, 2),
+      JSON.stringify(classResult, null, 2),
+      "utf8",
     );
   });
 
@@ -232,14 +300,23 @@ function train(classes = ["fake", "true"], nValues = [1, 2]) {
 }
 
 function getFeaturesByClassAndN(label, n) {
-  const filePath = path.join(__dirname, `training_results_${label}.json`);
+  const filePath = path.join(
+    __dirname,
+    `training_results_${label}.json`,
+  );
+
   if (!fs.existsSync(filePath)) {
     return null;
   }
-  const data = JSON.parse(fs.readFileSync(filePath, "utf8"));
-  const nGramType = n === 1 ? "unigram" : "bigram";
 
-  // Return the selected features for the specific n-gram type
+  const data = JSON.parse(
+    fs.readFileSync(filePath, "utf8"),
+  );
+
+  const nGramType = n === 1
+    ? "unigram"
+    : "bigram";
+
   return data.selectedFeatures[nGramType].map((term) => ({
     name: term.name,
     tfidf: term.tfidf,

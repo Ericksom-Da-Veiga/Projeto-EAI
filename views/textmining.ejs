@@ -1,67 +1,505 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-    <title>Text Mining Dashboard</title>
-    <style>
-      body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; margin: 0; padding: 0; background-color: #f4f4f9; }
-      nav { background: #2c3e50; padding: 1rem; display: flex; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-      nav a { color: #ecf0f1; text-decoration: none; font-weight: bold; font-size: 1.1rem; }
-      nav a:hover { color: #3498db; }
-      h1 { color: #2c3e50; padding: 20px; }
-      section { background: white; margin: 20px; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-      button { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
-      button:hover { background: #2980b9; }
-      textarea { width: 100%; max-width: 500px; padding: 10px; border-radius: 4px; border: 1px solid #ccc; }
-    </style>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Classificador de Fake News</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #202124;
+    }
+
+    .container {
+      width: min(1000px, 92%);
+      margin: 40px auto;
+    }
+
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .header h1 {
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #5f6368;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 14px;
+      resize: vertical;
+      border: 1px solid #c7c9cc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    button,
+    .button {
+      display: inline-block;
+      border: 0;
+      border-radius: 8px;
+      padding: 12px 18px;
+      margin-top: 12px;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 15px;
+      background: #1a73e8;
+      color: white;
+    }
+
+    .button-secondary {
+      background: #5f6368;
+    }
+
+    .button-fake {
+      background: #c5221f;
+    }
+
+    .button-true {
+      background: #188038;
+    }
+
+    .result {
+      padding: 20px;
+      border-radius: 10px;
+      background: #eef3fc;
+    }
+
+    .label {
+      font-size: 32px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .fake {
+      color: #c5221f;
+    }
+
+    .true {
+      color: #188038;
+    }
+
+    .message {
+      padding: 14px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .success {
+      background: #e6f4ea;
+      color: #137333;
+    }
+
+    .error {
+      background: #fce8e6;
+      color: #c5221f;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 16px;
+    }
+
+    th,
+    td {
+      border: 1px solid #dadce0;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #f1f3f4;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns:
+        repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .metric {
+      padding: 16px;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 22px;
+      margin-top: 6px;
+    }
+
+    .ranking {
+      padding-left: 20px;
+    }
+
+    .feedback-form {
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .terms {
+      max-height: 140px;
+      overflow-y: auto;
+      background: #f8f9fa;
+      padding: 12px;
+      border-radius: 8px;
+      font-family: monospace;
+    }
+  </style>
+</head>
+
 <body>
-<%
-  const navLinks = [
-    { href: '/corpus/fake', label: 'Corpus' },
-    { href: '/trainingset', label: 'Conjunto de Treino' },
-    { href: '/textmining', label: 'Text Mining Dashboard' }
-  ];
-%>
-<nav style="background: #2c3e50; padding: 1rem; display: flex; gap: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-  <% navLinks.forEach(link => { %>
-    <a href="<%= link.href %>" style="color: #ecf0f1; text-decoration: none; font-weight: bold; font-size: 1.1rem;"><%= link.label %></a>
-  <% }) %>
-</nav>
+  <main class="container">
+    <header class="header">
+      <h1>Classificador de Fake News</h1>
 
-    <h1>Text Mining Dashboard</h1>
+      <p>
+        Classificação automática de notícias através
+        de Text Mining e Naive Bayes.
+      </p>
+    </header>
 
-    <section>
-        <h2>1. Treino</h2>
-        <button id="btnTrain">Executar Processo de Treino</button>
-        <p id="trainStatus"></p>
+    <% if (message) { %>
+      <div class="message success">
+        <%= message %>
+      </div>
+    <% } %>
+
+    <% if (error) { %>
+      <div class="message error">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <section class="card">
+      <h2>Classificar notícia</h2>
+
+      <form
+        action="/textmining/classify"
+        method="POST"
+      >
+        <label for="text">
+          Texto da notícia
+        </label>
+
+        <textarea
+          id="text"
+          name="text"
+          required
+          placeholder="Cole aqui o texto da notícia..."
+        ><%= submittedText %></textarea>
+
+        <button type="submit">
+          Classificar
+        </button>
+      </form>
     </section>
 
-    <section>
-        <h2>2. Classificação</h2>
-        <textarea id="inputText" rows="4" cols="50"></textarea><br>
-        <select id="method">
-            <option value="naive">Naive Bayes</option>
-            <option value="cosine">Similaridade Cosseno</option>
-        </select>
-        <button id="btnClassify">Classificar</button>
-        <h3 id="result"></h3>
+    <% if (prediction) { %>
+      <section class="card">
+        <h2>Resultado</h2>
+
+        <div class="result">
+          <div
+            class="label <%= prediction.predictedLabel %>"
+          >
+            <%= prediction.predictedLabel %>
+          </div>
+
+          <p>
+            Confiança:
+            <strong>
+              <%=
+                (
+                  prediction.confidence * 100
+                ).toFixed(2)
+              %>%
+            </strong>
+          </p>
+        </div>
+
+        <h3>Resultados por classe</h3>
+
+        <ul class="ranking">
+          <% prediction.ranking.forEach((item) => { %>
+            <li>
+              <strong>
+                <%= item.label.toUpperCase() %>
+              </strong>:
+              <%=
+                (
+                  item.probability * 100
+                ).toFixed(2)
+              %>%
+            </li>
+          <% }) %>
+        </ul>
+
+        <h3>Texto pré-processado</h3>
+
+        <div class="terms">
+          <%= prediction.processed.preprocessedText %>
+        </div>
+
+        <p>
+          Termos reconhecidos:
+          <strong>
+            <%=
+              prediction.processed
+                .recognizedTermsCount
+            %>
+          </strong>
+        </p>
+
+        <h3>Corrigir classificação</h3>
+
+        <p>
+          Caso o resultado esteja incorreto, escolha
+          a classe correta para adicionar esta notícia
+          ao conjunto de treino.
+        </p>
+
+        <form
+          class="feedback-form"
+          action="/textmining/feedback"
+          method="POST"
+        >
+          <input
+            type="hidden"
+            name="text"
+            value="<%= submittedText %>"
+          >
+
+          <input
+            type="hidden"
+            name="correctLabel"
+            value="fake"
+          >
+
+          <button
+            class="button-fake"
+            type="submit"
+          >
+            Correto: Fake
+          </button>
+        </form>
+
+        <form
+          class="feedback-form"
+          action="/textmining/feedback"
+          method="POST"
+        >
+          <input
+            type="hidden"
+            name="text"
+            value="<%= submittedText %>"
+          >
+
+          <input
+            type="hidden"
+            name="correctLabel"
+            value="true"
+          >
+
+          <button
+            class="button-true"
+            type="submit"
+          >
+            Correto: True
+          </button>
+        </form>
+      </section>
+    <% } %>
+
+    <section class="card">
+      <h2>Avaliação do modelo</h2>
+
+      <p>
+        A avaliação utiliza 80% dos documentos para
+        treino e 20% para teste.
+      </p>
+
+      <a
+        class="button button-secondary"
+        href="/textmining/evaluate"
+      >
+        Executar avaliação
+      </a>
     </section>
+
+    <% if (evaluationResult) { %>
+      <section class="card">
+        <h2>Resultados da avaliação</h2>
+
+        <div class="metrics">
+          <div class="metric">
+            Documentos de treino
+            <strong>
+              <%= evaluationResult.trainingSize %>
+            </strong>
+          </div>
+
+          <div class="metric">
+            Documentos de teste
+            <strong>
+              <%= evaluationResult.testSize %>
+            </strong>
+          </div>
+
+          <div class="metric">
+            Características
+            <strong>
+              <%=
+                evaluationResult.selectedFeatures
+              %>
+            </strong>
+          </div>
+
+          <div class="metric">
+            Accuracy
+            <strong>
+              <%=
+                (
+                  evaluationResult.accuracy * 100
+                ).toFixed(2)
+              %>%
+            </strong>
+          </div>
+        </div>
+
+        <h3>Matriz de confusão</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Classe real</th>
+              <th>Prevista Fake</th>
+              <th>Prevista True</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr>
+              <th>Fake</th>
+
+              <td>
+                <%=
+                  evaluationResult
+                    .confusionMatrix.fake.fake
+                %>
+              </td>
+
+              <td>
+                <%=
+                  evaluationResult
+                    .confusionMatrix.fake.true
+                %>
+              </td>
+            </tr>
+
+            <tr>
+              <th>True</th>
+
+              <td>
+                <%=
+                  evaluationResult
+                    .confusionMatrix.true.fake
+                %>
+              </td>
+
+              <td>
+                <%=
+                  evaluationResult
+                    .confusionMatrix.true.true
+                %>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h3>Métricas por classe</h3>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Classe</th>
+              <th>Precisão</th>
+              <th>Recall</th>
+              <th>F1</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <% ["fake", "true"].forEach((label) => { %>
+              <tr>
+                <th>
+                  <%= label.toUpperCase() %>
+                </th>
+
+                <td>
+                  <%=
+                    (
+                      evaluationResult
+                        .perClass[label]
+                        .precision * 100
+                    ).toFixed(2)
+                  %>%
+                </td>
+
+                <td>
+                  <%=
+                    (
+                      evaluationResult
+                        .perClass[label]
+                        .recall * 100
+                    ).toFixed(2)
+                  %>%
+                </td>
+
+                <td>
+                  <%=
+                    (
+                      evaluationResult
+                        .perClass[label]
+                        .f1 * 100
+                    ).toFixed(2)
+                  %>%
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </section>
+    <% } %>
+  </main>
 </body>
-<script>
-    document.getElementById('btnTrain').onclick = async () => {
-        const res = await fetch('/textmining/train');
-        document.getElementById('trainStatus').innerText = "Treino concluído!";
-    };
-
-    document.getElementById('btnClassify').onclick = async () => {
-        const text = document.getElementById('inputText').value;
-        const method = document.getElementById('method').value;
-        const res = await fetch('/textmining/classify', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({text, method})
-        });
-        const data = await res.json();
-        document.getElementById('result').innerText = "Classe Prevista: " + data.label;
-    };
-</script>
 </html>
