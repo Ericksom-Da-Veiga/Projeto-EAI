@@ -28,7 +28,7 @@ app.use('/users', usersRouter);
 app.use('/corpus', corpusRouter);
 app.use('/trainingset', trainingsetRouter);
 app.use('/train', trainRouter);
-app.use('/train', trainRouter);
+app.use('/textmining', textMiningRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
