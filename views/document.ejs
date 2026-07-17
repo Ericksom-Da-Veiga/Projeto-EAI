@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Documento</title>
+</head>
+<body>
+  <h1><%= document.title %></h1>
+
+  <p><strong>Classe:</strong> <%= document.label %></p>
+  <p><strong>Assunto:</strong> <%= document.subject %></p>
+  <p><strong>Data:</strong> <%= document.date %></p>
+
+  <hr>
+
+  <p><%= document.text %></p>
+
+  <br>
+
+  <a href="/corpus/<%= document.label %>">Voltar</a>
+</body>
+</html>

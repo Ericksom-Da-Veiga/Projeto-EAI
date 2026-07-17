@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Training Set <%= label %></title>
+</head>
+<body>
+  <h1>Training Set: <%= label %></h1>
+
+  <p>
+    <a href="/trainingset/fake">Ver Fake</a> |
+    <a href="/trainingset/true">Ver True</a>
+  </p>
+
+  <p>Total de documentos: <%= documents.length %></p>
+
+  <ul>
+    <% documents.forEach(function(doc) { %>
+      <li>
+        <strong><%= doc.title %></strong>
+        <p><%= doc.text.substring(0, 250) %>...</p>
+      </li>
+      <hr>
+    <% }) %>
+  </ul>
+</body>
+</html>

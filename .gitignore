@@ -1,0 +1,11 @@
+# Pastas de dependências
+node_modules/
+
+# Arquivos pesados que você mencionou
+Fake.csv
+True.csv
+news.json
+
+# Logs e arquivos de sistema
+*.log
+.DS_Store
