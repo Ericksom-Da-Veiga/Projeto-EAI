@@ -1,21 +1,51 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt">
 <head>
-  <title>Documento</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= document.title %></title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; background-color: #f4f6f8; color: #202124; }
+    nav { background: #2c3e50; padding: 1rem 2rem; display: flex; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    nav a { color: #ecf0f1; text-decoration: none; font-weight: 500; font-size: 1.05rem; padding: 8px 12px; border-radius: 6px; transition: background 0.2s ease; }
+    nav a:hover, nav a.active { background: #34495e; color: #fff; }
+    .container { width: min(800px, 95%); margin: 40px auto; }
+    .card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); border: 1px solid #e0e0e0; }
+    .back-btn { display: inline-block; margin-bottom: 20px; color: #5f6368; text-decoration: none; font-weight: 500; }
+    .back-btn:hover { color: #1a73e8; }
+    h1 { color: #1a73e8; font-size: 2rem; margin-bottom: 20px; line-height: 1.3; }
+    .metadata { display: flex; flex-wrap: wrap; gap: 20px; font-size: 0.95rem; color: #5f6368; background: #f8f9fa; padding: 16px 20px; border-radius: 8px; margin-bottom: 30px; border-left: 4px solid #1a73e8;}
+    .content { color: #3c4043; line-height: 1.8; font-size: 1.1rem; white-space: pre-wrap; }
+    .label-badge { background: #e0e0e0; padding: 4px 12px; border-radius: 20px; font-weight: bold; color: #333; }
+    .label-badge.fake { background: #fce8e6; color: #c5221f; }
+    .label-badge.true { background: #e6f4ea; color: #137333; }
+  </style>
 </head>
 <body>
-  <h1><%= document.title %></h1>
 
-  <p><strong>Classe:</strong> <%= document.label %></p>
-  <p><strong>Assunto:</strong> <%= document.subject %></p>
-  <p><strong>Data:</strong> <%= document.date %></p>
+  <nav>
+    <a href="/corpus/fake" class="active">Corpus (Bruto)</a>
+    <a href="/trainingset/fake">Conjunto de Treino</a>
+    <a href="/textmining">Text Mining Dashboard</a>
+    <a href="/summary">Resumo do Dataset</a>
+  </nav>
 
-  <hr>
+  <main class="container">
+    <a href="/corpus/<%= document.label %>" class="back-btn">&larr; Voltar ao Corpus</a>
+    
+    <article class="card">
+      <h1><%= document.title %></h1>
+      
+      <div class="metadata">
+        <span>Classe: <span class="label-badge <%= document.label %>"><%= document.label.toUpperCase() %></span></span>
+        <span>Assunto: <strong><%= document.subject %></strong></span>
+        <span>Data: <strong><%= document.date %></strong></span>
+      </div>
 
-  <p><%= document.text %></p>
+      <div class="content"><%= document.text %></div>
+    </article>
+  </main>
 
-  <br>
-
-  <a href="/corpus/<%= document.label %>">Voltar</a>
 </body>
 </html>

@@ -3,9 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
   <title>Classificador de Fake News</title>
 
   <style>
@@ -14,6 +12,11 @@
       margin: 0;
       padding: 0;
     }
+
+    /* ESTILOS DA BARRA DE NAVEGAÇÃO */
+    nav { background: #2c3e50; padding: 1rem 2rem; display: flex; gap: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    nav a { color: #ecf0f1; text-decoration: none; font-weight: 500; font-size: 1.05rem; padding: 8px 12px; border-radius: 6px; transition: background 0.2s ease; font-family: system-ui, -apple-system, sans-serif; }
+    nav a:hover, nav a.active { background: #34495e; color: #fff; }
 
     body {
       font-family: Arial, Helvetica, sans-serif;
@@ -47,297 +50,149 @@
     }
 
     .metrics {
-
       display: grid;
-
-      grid-template-columns:
-        repeat(auto-fit, minmax(180px, 1fr));
-
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: 16px;
-
       margin-top: 20px;
-
     }
 
     .metric {
-
       background: #f8f9fb;
-
       border-radius: 10px;
-
       padding: 18px;
-
       text-align: center;
-
     }
 
     .metric span {
-
       display: block;
-
       font-size: 13px;
-
       color: #666;
-
     }
 
     .metric strong {
-
       display: block;
-
       margin-top: 8px;
-
       font-size: 28px;
-
     }
 
     textarea {
-
       width: 100%;
-
       min-height: 220px;
-
       resize: vertical;
-
       border-radius: 10px;
-
       border: 1px solid #ccc;
-
       padding: 15px;
-
       font-size: 15px;
-
     }
 
     button {
-
       margin-top: 16px;
-
       padding: 12px 22px;
-
       border: none;
-
       border-radius: 8px;
-
       cursor: pointer;
-
       background: #1a73e8;
-
       color: white;
-
       font-size: 15px;
-
     }
 
-    .button-secondary {
-
-      background: #5f6368;
-
-    }
-
-    .button-fake {
-
-      background: #c62828;
-
-    }
-
-    .button-true {
-
-      background: #2e7d32;
-
-    }
+    .button-secondary { background: #5f6368; }
+    .button-fake { background: #c62828; }
+    .button-true { background: #2e7d32; }
 
     .message {
-
       padding: 15px;
-
       border-radius: 8px;
-
       margin-bottom: 20px;
-
     }
 
-    .success {
-
-      background: #e8f5e9;
-
-      color: #1b5e20;
-
-    }
-
-    .error {
-
-      background: #ffebee;
-
-      color: #b71c1c;
-
-    }
+    .success { background: #e8f5e9; color: #1b5e20; }
+    .error { background: #ffebee; color: #b71c1c; }
 
     .result {
-
       padding: 20px;
-
       border-radius: 10px;
-
       background: #f5f8fd;
-
     }
 
     .label {
-
       font-size: 34px;
-
       font-weight: bold;
-
     }
 
-    .fake {
-
-      color: #d32f2f;
-
-    }
-
-    .true {
-
-      color: #2e7d32;
-
-    }
+    .fake { color: #d32f2f; }
+    .true { color: #2e7d32; }
 
     .progress {
-
       margin-top: 10px;
-
       height: 18px;
-
       background: #ddd;
-
       border-radius: 10px;
-
       overflow: hidden;
-
     }
 
     .progress-bar {
-
       height: 100%;
-
       background: #1a73e8;
-
     }
 
     table {
-
       width: 100%;
-
       border-collapse: collapse;
-
       margin-top: 18px;
-
     }
 
-    th,
-    td {
-
+    th, td {
       border: 1px solid #ddd;
-
       padding: 10px;
-
       text-align: center;
-
     }
 
-    th {
-
-      background: #f2f2f2;
-
-    }
+    th { background: #f2f2f2; }
 
     pre {
-
       background: #fafafa;
-
       border-radius: 8px;
-
       padding: 14px;
-
       overflow: auto;
-
       white-space: pre-wrap;
-
     }
 
     .terms {
-
       max-height: 170px;
-
       overflow: auto;
-
       background: #fafafa;
-
       border-radius: 8px;
-
       padding: 12px;
-
       font-family: monospace;
-
     }
 
     .tag {
-
       display: inline-block;
-
       padding: 5px 10px;
-
       border-radius: 20px;
-
       margin: 4px;
-
       background: #eceff1;
-
       font-size: 13px;
-
     }
 
-    .good {
-
-      background: #dcedc8;
-
-    }
-
-    .bad {
-
-      background: #ffcdd2;
-
-    }
-
-    .info {
-
-      background: #e3f2fd;
-
-    }
-
-    hr {
-
-      margin: 25px 0;
-
-      border: none;
-
-      border-top: 1px solid #ddd;
-
-    }
-
-    .small {
-
-      color: #777;
-
-      font-size: 14px;
-
-    }
+    .good { background: #dcedc8; }
+    .bad { background: #ffcdd2; }
+    .info { background: #e3f2fd; }
+    hr { margin: 25px 0; border: none; border-top: 1px solid #ddd; }
+    .small { color: #777; font-size: 14px; }
   </style>
-
 </head>
 
 <body>
+  <!-- BARRA DE NAVEGAÇÃO ADICIONADA AQUI -->
+  <nav>
+    <a href="/corpus/fake">Corpus (Bruto)</a>
+    <a href="/trainingset/fake">Conjunto de Treino</a>
+    <a href="/textmining" class="active">Text Mining Dashboard</a>
+    <a href="/summary">Resumo do Dataset</a>
+  </nav>
+
   <main class="container">
     <header class="header">
       <section class="card">
