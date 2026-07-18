@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <title>Resumo do Dataset</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      color: #202124;
+    }
+
+    main {
+      width: min(900px, 92%);
+      margin: 40px auto;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+      box-shadow:
+        0 2px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns:
+        repeat(
+          auto-fit,
+          minmax(180px, 1fr)
+        );
+      gap: 14px;
+    }
+
+    .metric {
+      background: #f8f9fa;
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 30px;
+    }
+
+    .success {
+      color: #137333;
+    }
+
+    .warning {
+      color: #b06000;
+    }
+
+    a {
+      color: #1a73e8;
+      text-decoration: none;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <section class="card">
+      <h1>Resumo do Dataset</h1>
+
+      <p>
+        Distribuição das notícias utilizadas
+        no processo de Text Mining.
+      </p>
+
+      <p>
+        <a href="/textmining">
+          Ir para o classificador
+        </a>
+      </p>
+    </section>
+
+    <section class="card">
+      <div class="metrics">
+        <div class="metric">
+          Total de documentos
+          <strong>
+            <%= totalDocuments %>
+          </strong>
+        </div>
+
+        <div class="metric">
+          Notícias Fake
+          <strong>
+            <%= fakeDocuments %>
+          </strong>
+
+          <span>
+            <%= fakePercentage.toFixed(2) %>%
+          </span>
+        </div>
+
+        <div class="metric">
+          Notícias True
+          <strong>
+            <%= trueDocuments %>
+          </strong>
+
+          <span>
+            <%= truePercentage.toFixed(2) %>%
+          </span>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Equilíbrio das classes</h2>
+
+      <% if (balanced) { %>
+        <p class="success">
+          O conjunto apresenta uma distribuição
+          equilibrada entre as classes.
+        </p>
+      <% } else { %>
+        <p class="warning">
+          O conjunto apresenta diferença relevante
+          entre as quantidades das classes.
+        </p>
+      <% } %>
+
+      <% if (
+        fakeDocuments >= 100 &&
+        trueDocuments >= 100
+      ) { %>
+        <p class="success">
+          O conjunto contém pelo menos
+          100 documentos em cada classe.
+        </p>
+      <% } else { %>
+        <p class="warning">
+          É necessário utilizar pelo menos
+          100 documentos por classe.
+        </p>
+      <% } %>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,34 +1,33 @@
 <!DOCTYPE html>
 <html lang="pt">
+
 <head>
   <meta charset="UTF-8">
 
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>Classificador de Fake News</title>
 
   <style>
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #f4f6f8;
-      color: #202124;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef2f7;
+      color: #1d1d1d;
     }
 
     .container {
-      width: min(1000px, 92%);
-      margin: 40px auto;
+      width: min(1300px, 95%);
+      margin: 35px auto;
     }
 
     .header {
-      margin-bottom: 24px;
+      margin-bottom: 25px;
     }
 
     .header h1 {
@@ -36,150 +35,361 @@
     }
 
     .header p {
-      margin: 0;
-      color: #5f6368;
+      color: #666;
     }
 
     .card {
-      background: white;
-      border-radius: 12px;
+      background: #fff;
+      border-radius: 14px;
       padding: 24px;
       margin-bottom: 24px;
-      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .08);
+    }
+
+    .metrics {
+
+      display: grid;
+
+      grid-template-columns:
+        repeat(auto-fit, minmax(180px, 1fr));
+
+      gap: 16px;
+
+      margin-top: 20px;
+
+    }
+
+    .metric {
+
+      background: #f8f9fb;
+
+      border-radius: 10px;
+
+      padding: 18px;
+
+      text-align: center;
+
+    }
+
+    .metric span {
+
+      display: block;
+
+      font-size: 13px;
+
+      color: #666;
+
+    }
+
+    .metric strong {
+
+      display: block;
+
+      margin-top: 8px;
+
+      font-size: 28px;
+
     }
 
     textarea {
+
       width: 100%;
-      min-height: 180px;
-      padding: 14px;
+
+      min-height: 220px;
+
       resize: vertical;
-      border: 1px solid #c7c9cc;
-      border-radius: 8px;
-      font-size: 16px;
+
+      border-radius: 10px;
+
+      border: 1px solid #ccc;
+
+      padding: 15px;
+
+      font-size: 15px;
+
     }
 
-    button,
-    .button {
-      display: inline-block;
-      border: 0;
+    button {
+
+      margin-top: 16px;
+
+      padding: 12px 22px;
+
+      border: none;
+
       border-radius: 8px;
-      padding: 12px 18px;
-      margin-top: 12px;
+
       cursor: pointer;
-      text-decoration: none;
-      font-size: 15px;
+
       background: #1a73e8;
+
       color: white;
+
+      font-size: 15px;
+
     }
 
     .button-secondary {
+
       background: #5f6368;
+
     }
 
     .button-fake {
-      background: #c5221f;
+
+      background: #c62828;
+
     }
 
     .button-true {
-      background: #188038;
-    }
 
-    .result {
-      padding: 20px;
-      border-radius: 10px;
-      background: #eef3fc;
-    }
+      background: #2e7d32;
 
-    .label {
-      font-size: 32px;
-      font-weight: bold;
-      text-transform: uppercase;
-    }
-
-    .fake {
-      color: #c5221f;
-    }
-
-    .true {
-      color: #188038;
     }
 
     .message {
-      padding: 14px;
+
+      padding: 15px;
+
       border-radius: 8px;
+
       margin-bottom: 20px;
+
     }
 
     .success {
-      background: #e6f4ea;
-      color: #137333;
+
+      background: #e8f5e9;
+
+      color: #1b5e20;
+
     }
 
     .error {
-      background: #fce8e6;
-      color: #c5221f;
+
+      background: #ffebee;
+
+      color: #b71c1c;
+
+    }
+
+    .result {
+
+      padding: 20px;
+
+      border-radius: 10px;
+
+      background: #f5f8fd;
+
+    }
+
+    .label {
+
+      font-size: 34px;
+
+      font-weight: bold;
+
+    }
+
+    .fake {
+
+      color: #d32f2f;
+
+    }
+
+    .true {
+
+      color: #2e7d32;
+
+    }
+
+    .progress {
+
+      margin-top: 10px;
+
+      height: 18px;
+
+      background: #ddd;
+
+      border-radius: 10px;
+
+      overflow: hidden;
+
+    }
+
+    .progress-bar {
+
+      height: 100%;
+
+      background: #1a73e8;
+
     }
 
     table {
+
       width: 100%;
+
       border-collapse: collapse;
-      margin-top: 16px;
+
+      margin-top: 18px;
+
     }
 
     th,
     td {
-      border: 1px solid #dadce0;
+
+      border: 1px solid #ddd;
+
       padding: 10px;
+
       text-align: center;
+
     }
 
     th {
-      background: #f1f3f4;
+
+      background: #f2f2f2;
+
     }
 
-    .metrics {
-      display: grid;
-      grid-template-columns:
-        repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px;
-      margin-top: 18px;
-    }
+    pre {
 
-    .metric {
-      padding: 16px;
-      background: #f8f9fa;
+      background: #fafafa;
+
       border-radius: 8px;
-    }
 
-    .metric strong {
-      display: block;
-      font-size: 22px;
-      margin-top: 6px;
-    }
+      padding: 14px;
 
-    .ranking {
-      padding-left: 20px;
-    }
+      overflow: auto;
 
-    .feedback-form {
-      display: inline-block;
-      margin-right: 8px;
+      white-space: pre-wrap;
+
     }
 
     .terms {
-      max-height: 140px;
-      overflow-y: auto;
-      background: #f8f9fa;
-      padding: 12px;
+
+      max-height: 170px;
+
+      overflow: auto;
+
+      background: #fafafa;
+
       border-radius: 8px;
+
+      padding: 12px;
+
       font-family: monospace;
+
+    }
+
+    .tag {
+
+      display: inline-block;
+
+      padding: 5px 10px;
+
+      border-radius: 20px;
+
+      margin: 4px;
+
+      background: #eceff1;
+
+      font-size: 13px;
+
+    }
+
+    .good {
+
+      background: #dcedc8;
+
+    }
+
+    .bad {
+
+      background: #ffcdd2;
+
+    }
+
+    .info {
+
+      background: #e3f2fd;
+
+    }
+
+    hr {
+
+      margin: 25px 0;
+
+      border: none;
+
+      border-top: 1px solid #ddd;
+
+    }
+
+    .small {
+
+      color: #777;
+
+      font-size: 14px;
+
     }
   </style>
+
 </head>
 
 <body>
   <main class="container">
     <header class="header">
+      <section class="card">
+        <h2>Estado do modelo</h2>
+
+        <% if (modelSummary && modelSummary.trained) { %>
+          <div class="metrics">
+            <div class="metric">
+              Estado
+              <strong>Treinado</strong>
+            </div>
+
+            <div class="metric">
+              Documentos
+              <strong>
+                <%= modelSummary.totalDocuments %>
+              </strong>
+            </div>
+
+            <div class="metric">
+              Características
+              <strong>
+                <%= modelSummary.vocabularySize %>
+              </strong>
+            </div>
+
+            <div class="metric">
+              Documentos Fake
+              <strong>
+                <%= modelSummary.classes.fake.documents %>
+              </strong>
+            </div>
+
+            <div class="metric">
+              Documentos True
+              <strong>
+                <%= modelSummary.classes.true.documents %>
+              </strong>
+            </div>
+          </div>
+          <% } else { %>
+            <p>
+              O modelo ainda não foi treinado nesta execução.
+            </p>
+            <% } %>
+
+              <form action="/textmining/train" method="POST">
+                <button type="submit">
+                  Treinar modelo
+                </button>
+              </form>
+      </section>
       <h1>Classificador de Fake News</h1>
 
       <p>
@@ -192,314 +402,1233 @@
       <div class="message success">
         <%= message %>
       </div>
-    <% } %>
+      <% } %>
 
-    <% if (error) { %>
-      <div class="message error">
-        <%= error %>
-      </div>
-    <% } %>
-
-    <section class="card">
-      <h2>Classificar notícia</h2>
-
-      <form
-        action="/textmining/classify"
-        method="POST"
-      >
-        <label for="text">
-          Texto da notícia
-        </label>
-
-        <textarea
-          id="text"
-          name="text"
-          required
-          placeholder="Cole aqui o texto da notícia..."
-        ><%= submittedText %></textarea>
-
-        <button type="submit">
-          Classificar
-        </button>
-      </form>
-    </section>
-
-    <% if (prediction) { %>
-      <section class="card">
-        <h2>Resultado</h2>
-
-        <div class="result">
-          <div
-            class="label <%= prediction.predictedLabel %>"
-          >
-            <%= prediction.predictedLabel %>
+        <% if (error) { %>
+          <div class="message error">
+            <%= error %>
           </div>
+          <% } %>
 
-          <p>
-            Confiança:
-            <strong>
-              <%=
-                (
-                  prediction.confidence * 100
-                ).toFixed(2)
-              %>%
-            </strong>
-          </p>
-        </div>
+            <section class="card">
+              <h2>Classificar notícia</h2>
 
-        <h3>Resultados por classe</h3>
+              <form action="/textmining/classify" method="POST">
+                <label for="text">
+                  Texto da notícia
+                </label>
 
-        <ul class="ranking">
-          <% prediction.ranking.forEach((item) => { %>
-            <li>
-              <strong>
-                <%= item.label.toUpperCase() %>
-              </strong>:
-              <%=
-                (
-                  item.probability * 100
-                ).toFixed(2)
-              %>%
-            </li>
-          <% }) %>
-        </ul>
+                <textarea id="text" name="text" required
+                  placeholder="Cole aqui o texto da notícia..."><%= submittedText %></textarea>
 
-        <h3>Texto pré-processado</h3>
+                <button type="submit">
+                  Classificar
+                </button>
+              </form>
+            </section>
 
-        <div class="terms">
-          <%= prediction.processed.preprocessedText %>
-        </div>
+            <% if (prediction) { %>
+              <section class="card">
+                <h2>Resultado da classificação</h2>
 
-        <p>
-          Termos reconhecidos:
-          <strong>
-            <%=
-              prediction.processed
-                .recognizedTermsCount
-            %>
+                <div class="result">
+                  <p class="small">
+                    Classe prevista
+                  </p>
+
+                  <div class="label <%= prediction.predictedLabel %>">
+                    <%= prediction.predictedLabel.toUpperCase() %>
+                  </div>
+
+                  <p>
+                    Confiança da previsão:
+                    <strong>
+                      <%= prediction.confidencePercentage.toFixed(2) %>%
+                    </strong>
+                  </p>
+
+                  <div class="progress">
+                    <div class="progress-bar" data-width="<%= prediction.confidencePercentage.toFixed(2) %>">
+                    </div>
+                  </div>
+
+                  <p style="margin-top: 14px;">
+                    Nível de confiança:
+                    <strong>
+                      <%= prediction.confidenceLevel.toUpperCase() %>
+                    </strong>
+                  </p>
+
+                  <p>
+                    <%= prediction.explanation %>
+                  </p>
+                </div>
+
+                <div class="metrics">
+                  <div class="metric">
+                    <span>Classe prevista</span>
+                    <strong class="<%= prediction.predictedLabel %>">
+                      <%= prediction.predictedLabel.toUpperCase() %>
+                    </strong>
+                  </div>
+
+                  <div class="metric">
+                    <span>Confiança</span>
+                    <strong>
+                      <%= prediction.confidencePercentage.toFixed(2) %>%
+                    </strong>
+                  </div>
+
+                  <div class="metric">
+                    <span>Margem entre as classes</span>
+                    <strong>
+                      <%= (prediction.confidenceMargin * 100).toFixed(2) %>%
+                    </strong>
+                  </div>
+
+                  <div class="metric">
+                    <span>Tempo de classificação</span>
+                    <strong>
+                      <%= prediction.processingTimeMs.toFixed(2) %> ms
+                    </strong>
+                  </div>
+
+                  <div class="metric">
+                    <span>Termos reconhecidos</span>
+                    <strong>
+                      <%= prediction.processed.recognizedTermsCount %>
+                    </strong>
+                  </div>
+
+                  <div class="metric">
+                    <span>Cobertura do vocabulário</span>
+                    <strong>
+                      <%= prediction.processed.vocabularyCoveragePercentage.toFixed(2) %>%
+                    </strong>
+                  </div>
+                </div>
+
+                <hr>
+
+                <h3>Probabilidades por classe</h3>
+
+                <% prediction.ranking.forEach((item)=> { %>
+                  <div style="margin-top: 18px;">
+                    <p>
+                      <strong class="<%= item.label %>">
+                        <%= item.label.toUpperCase() %>
+                      </strong>
+
+                      <span style="float: right;">
+                        <%= item.percentage.toFixed(2) %>%
+                      </span>
+                    </p>
+
+                    <div class="progress">
+                      <div class="progress-bar" data-width="width: <%= item.percentage.toFixed(2) %>%;">
+                      </div>
+                    </div>
+                  </div>
+                  <% }) %>
+
+                    <hr>
+
+                    <h3>Informações do processamento</h3>
+
+                    <div class="metrics">
+                      <div class="metric">
+                        <span>Palavras no texto original</span>
+                        <strong>
+                          <%= prediction.processed.originalWordsCount %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Palavras após o pré-processamento</span>
+                        <strong>
+                          <%= prediction.processed.preprocessedWordsCount %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Total de termos gerados</span>
+                        <strong>
+                          <%= prediction.processed.totalTermsCount %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Termos únicos</span>
+                        <strong>
+                          <%= prediction.processed.uniqueTermsCount %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Termos reconhecidos únicos</span>
+                        <strong>
+                          <%= prediction.processed.uniqueRecognizedTermsCount %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Termos ignorados</span>
+                        <strong>
+                          <%= prediction.processed.ignoredTermsCount %>
+                        </strong>
+                      </div>
+                    </div>
+
+                    <h3 style="margin-top: 24px;">
+                      Texto após o pré-processamento
+                    </h3>
+
+                    <div class="terms">
+                      <% if (prediction.processed.preprocessedText) { %>
+                        <%= prediction.processed.preprocessedText %>
+                          <% } else { %>
+                            Nenhum termo permaneceu após o pré-processamento.
+                            <% } %>
+                    </div>
+
+                    <h3 style="margin-top: 24px;">
+                      Termos reconhecidos pelo modelo
+                    </h3>
+
+                    <div class="terms">
+                      <% if ( prediction.processed.uniqueRecognizedTerms &&
+                        prediction.processed.uniqueRecognizedTerms.length> 0
+                        ) { %>
+
+                        <% prediction.processed.uniqueRecognizedTerms.forEach((term)=> { %>
+                          <span class="tag info">
+                            <%= term %>
+                          </span>
+                          <% }) %>
+
+                            <% } else { %>
+                              Nenhum termo foi reconhecido pelo vocabulário.
+                              <% } %>
+                    </div>
+
+                    <h3 style="margin-top: 24px;">
+                      Termos ignorados pelo modelo
+                    </h3>
+
+                    <div class="terms">
+                      <% if ( prediction.processed.uniqueIgnoredTerms && prediction.processed.uniqueIgnoredTerms.length>
+                        0
+                        ) { %>
+
+                        <% prediction.processed.uniqueIgnoredTerms .slice(0, 100) .forEach((term)=> { %>
+
+                          <span class="tag">
+                            <%= term %>
+                          </span>
+                          <% }) %>
+
+                            <% } else { %>
+                              Todos os termos processados foram reconhecidos.
+                              <% } %>
+                    </div>
+
+                    <hr>
+
+                    <h3>Termos que mais influenciaram a previsão</h3>
+
+                    <p class="small">
+                      Estes termos apresentaram maior diferença de probabilidade entre
+                      a classe prevista e a outra classe.
+                    </p>
+
+                    <% if ( prediction.contributions && prediction.contributions.favorable &&
+                      prediction.contributions.favorable.length> 0
+                      ) { %>
+
+                      <table>
+                        <thead>
+                          <tr>
+                            <th>Termo</th>
+                            <th>Frequência</th>
+                            <th>Contribuição</th>
+                            <th>Favorece</th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          <% prediction.contributions.favorable .slice(0, 15) .forEach((item)=> { %>
+
+                            <tr>
+                              <td>
+                                <span class="tag good">
+                                  <%= item.term %>
+                                </span>
+                              </td>
+
+                              <td>
+                                <%= item.frequency %>
+                              </td>
+
+                              <td>
+                                <%= item.contribution.toFixed(4) %>
+                              </td>
+
+                              <td class="<%= prediction.predictedLabel %>">
+                                <strong>
+                                  <%= prediction.predictedLabel.toUpperCase() %>
+                                </strong>
+                              </td>
+                            </tr>
+                            <% }) %>
+                        </tbody>
+                      </table>
+
+                      <% } else { %>
+                        <p>
+                          Não foram encontradas contribuições favoráveis relevantes.
+                        </p>
+                        <% } %>
+
+                          <% if ( prediction.contributions && prediction.contributions.opposing &&
+                            prediction.contributions.opposing.length> 0
+                            ) { %>
+
+                            <h3 style="margin-top: 28px;">
+                              Termos contrários à previsão
+                            </h3>
+
+                            <p class="small">
+                              Estes termos apresentaram maior associação com a outra classe.
+                            </p>
+
+                            <table>
+                              <thead>
+                                <tr>
+                                  <th>Termo</th>
+                                  <th>Frequência</th>
+                                  <th>Contribuição</th>
+                                  <th>Favorece</th>
+                                </tr>
+                              </thead>
+
+                              <tbody>
+                                <% prediction.contributions.opposing .slice(0, 15) .forEach((item)=> { %>
+
+                                  <tr>
+                                    <td>
+                                      <span class="tag bad">
+                                        <%= item.term %>
+                                      </span>
+                                    </td>
+
+                                    <td>
+                                      <%= item.frequency %>
+                                    </td>
+
+                                    <td>
+                                      <%= item.contribution.toFixed(4) %>
+                                    </td>
+
+                                    <td>
+                                      <strong>
+                                        <%= item.referenceLabel.toUpperCase() %>
+                                      </strong>
+                                    </td>
+                                  </tr>
+                                  <% }) %>
+                              </tbody>
+                            </table>
+                            <% } %>
+
+                              <% if (prediction.model) { %>
+                                <hr>
+
+                                <h3>Modelo utilizado</h3>
+
+                                <div class="metrics">
+                                  <div class="metric">
+                                    <span>Algoritmo</span>
+                                    <strong style="font-size: 18px;">
+                                      <%= prediction.model.algorithm %>
+                                    </strong>
+                                  </div>
+
+                                  <div class="metric">
+                                    <span>Documentos de treino</span>
+                                    <strong>
+                                      <%= prediction.model.totalDocuments %>
+                                    </strong>
+                                  </div>
+
+                                  <div class="metric">
+                                    <span>Tamanho do vocabulário</span>
+                                    <strong>
+                                      <%= prediction.model.vocabularySize %>
+                                    </strong>
+                                  </div>
+
+                                  <div class="metric">
+                                    <span>Máximo de características</span>
+                                    <strong>
+                                      <%= prediction.model.maxFeatures %>
+                                    </strong>
+                                  </div>
+
+                                  <div class="metric">
+                                    <span>N-gramas</span>
+                                    <strong>
+                                      <%= prediction.model.ngramSizes.join(", ") %>
           </strong>
-        </p>
-
-        <h3>Corrigir classificação</h3>
-
-        <p>
-          Caso o resultado esteja incorreto, escolha
-          a classe correta para adicionar esta notícia
-          ao conjunto de treino.
-        </p>
-
-        <form
-          class="feedback-form"
-          action="/textmining/feedback"
-          method="POST"
-        >
-          <input
-            type="hidden"
-            name="text"
-            value="<%= submittedText %>"
-          >
-
-          <input
-            type="hidden"
-            name="correctLabel"
-            value="fake"
-          >
-
-          <button
-            class="button-fake"
-            type="submit"
-          >
-            Correto: Fake
-          </button>
-        </form>
-
-        <form
-          class="feedback-form"
-          action="/textmining/feedback"
-          method="POST"
-        >
-          <input
-            type="hidden"
-            name="text"
-            value="<%= submittedText %>"
-          >
-
-          <input
-            type="hidden"
-            name="correctLabel"
-            value="true"
-          >
-
-          <button
-            class="button-true"
-            type="submit"
-          >
-            Correto: True
-          </button>
-        </form>
-      </section>
-    <% } %>
-
-    <section class="card">
-      <h2>Avaliação do modelo</h2>
-
-      <p>
-        A avaliação utiliza 80% dos documentos para
-        treino e 20% para teste.
-      </p>
-
-      <a
-        class="button button-secondary"
-        href="/textmining/evaluate"
-      >
-        Executar avaliação
-      </a>
-    </section>
-
-    <% if (evaluationResult) { %>
-      <section class="card">
-        <h2>Resultados da avaliação</h2>
-
-        <div class="metrics">
-          <div class="metric">
-            Documentos de treino
-            <strong>
-              <%= evaluationResult.trainingSize %>
-            </strong>
-          </div>
-
-          <div class="metric">
-            Documentos de teste
-            <strong>
-              <%= evaluationResult.testSize %>
-            </strong>
-          </div>
-
-          <div class="metric">
-            Características
-            <strong>
-              <%=
-                evaluationResult.selectedFeatures
-              %>
-            </strong>
-          </div>
-
-          <div class="metric">
-            Accuracy
-            <strong>
-              <%=
-                (
-                  evaluationResult.accuracy * 100
-                ).toFixed(2)
-              %>%
-            </strong>
-          </div>
         </div>
 
-        <h3>Matriz de confusão</h3>
+        <div class=" metric">
+                                        <span>Suavização de Laplace</span>
+                                        <strong>
+                                          <%= prediction.model.laplaceSmoothing %>
+                                        </strong>
+                                  </div>
+                                </div>
+                                <% } %>
 
-        <table>
-          <thead>
-            <tr>
-              <th>Classe real</th>
-              <th>Prevista Fake</th>
-              <th>Prevista True</th>
-            </tr>
-          </thead>
+                                  <hr>
 
-          <tbody>
-            <tr>
-              <th>Fake</th>
+                                  <h3>Corrigir classificação</h3>
 
-              <td>
-                <%=
-                  evaluationResult
-                    .confusionMatrix.fake.fake
-                %>
-              </td>
+                                  <p>
+                                    Caso o resultado esteja incorreto, selecione a classe correta.
+                                    O texto será adicionado ao conjunto de treino e o modelo deverá
+                                    ser treinado novamente.
+                                  </p>
 
-              <td>
-                <%=
-                  evaluationResult
-                    .confusionMatrix.fake.true
-                %>
-              </td>
-            </tr>
+                                  <form class="feedback-form" action="/textmining/feedback" method="POST">
+                                    <input type="hidden" name="text" value="<%= submittedText %>">
 
-            <tr>
-              <th>True</th>
+                                    <input type="hidden" name="correctLabel" value="fake">
 
-              <td>
-                <%=
-                  evaluationResult
-                    .confusionMatrix.true.fake
-                %>
-              </td>
+                                    <button class="button-fake" type="submit">
+                                      Adicionar como Fake
+                                    </button>
+                                  </form>
 
-              <td>
-                <%=
-                  evaluationResult
-                    .confusionMatrix.true.true
-                %>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                                  <form class="feedback-form" action="/textmining/feedback" method="POST">
+                                    <input type="hidden" name="text" value="<%= submittedText %>">
 
-        <h3>Métricas por classe</h3>
+                                    <input type="hidden" name="correctLabel" value="true">
 
-        <table>
-          <thead>
-            <tr>
-              <th>Classe</th>
-              <th>Precisão</th>
-              <th>Recall</th>
-              <th>F1</th>
-            </tr>
-          </thead>
+                                    <button class="button-true" type="submit">
+                                      Adicionar como True
+                                    </button>
+                                  </form>
+              </section>
+              <% } %>
 
-          <tbody>
-            <% ["fake", "true"].forEach((label) => { %>
-              <tr>
-                <th>
-                  <%= label.toUpperCase() %>
-                </th>
+                <section class="card">
+                  <h2>Avaliação do modelo</h2>
 
-                <td>
-                  <%=
-                    (
-                      evaluationResult
-                        .perClass[label]
-                        .precision * 100
-                    ).toFixed(2)
-                  %>%
-                </td>
+                  <p>
+                    A avaliação utiliza 80% dos documentos para
+                    treino e 20% para teste.
+                  </p>
 
-                <td>
-                  <%=
-                    (
-                      evaluationResult
-                        .perClass[label]
-                        .recall * 100
-                    ).toFixed(2)
-                  %>%
-                </td>
+                  <form action="/textmining/evaluate" method="POST">
+                    <button class="button-secondary" type="submit">
+                      Executar avaliação
+                    </button>
+                  </form>
+                </section>
 
-                <td>
-                  <%=
-                    (
-                      evaluationResult
-                        .perClass[label]
-                        .f1 * 100
-                    ).toFixed(2)
-                  %>%
-                </td>
-              </tr>
-            <% }) %>
-          </tbody>
-        </table>
-      </section>
-    <% } %>
+                <% if (evaluationResult) { %>
+
+                  <section class="card">
+
+                    <h2>Resultados da Avaliação</h2>
+
+                    <div class="metrics">
+
+                      <div class="metric">
+                        <span>Accuracy</span>
+                        <strong>
+                          <%= evaluationResult.accuracyPercentage.toFixed(2) %>%
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Documentos de treino</span>
+                        <strong>
+                          <%= evaluationResult.trainingSize %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Documentos de teste</span>
+                        <strong>
+                          <%= evaluationResult.testSize %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Vocabulário</span>
+                        <strong>
+                          <%= evaluationResult.vocabularySize %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Características</span>
+                        <strong>
+                          <%= evaluationResult.selectedFeatures %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Acertos</span>
+                        <strong>
+                          <%= evaluationResult.summary.correctPredictions %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Erros</span>
+                        <strong>
+                          <%= evaluationResult.summary.incorrectPredictions %>
+                        </strong>
+                      </div>
+
+                      <div class="metric">
+                        <span>Taxa de erro</span>
+                        <strong>
+                          <%= evaluationResult.summary.errorRatePercentage.toFixed(2) %>%
+                        </strong>
+                      </div>
+
+                    </div>
+
+                    <hr>
+
+                    <h3>Matriz de Confusão</h3>
+
+                    <table>
+
+                      <thead>
+
+                        <tr>
+
+                          <th></th>
+
+                          <th>Previsto Fake</th>
+
+                          <th>Previsto True</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        <tr>
+
+                          <th>Fake</th>
+
+                          <td>
+                            <%= evaluationResult.confusionMatrix.fake.fake %>
+                          </td>
+
+                          <td>
+                            <%= evaluationResult.confusionMatrix.fake.true %>
+                          </td>
+
+                        </tr>
+
+                        <tr>
+
+                          <th>True</th>
+
+                          <td>
+                            <%= evaluationResult.confusionMatrix.true.fake %>
+                          </td>
+
+                          <td>
+                            <%= evaluationResult.confusionMatrix.true.true %>
+                          </td>
+
+                        </tr>
+
+                      </tbody>
+
+                    </table>
+
+                    <hr>
+
+                    <h3>Métricas por Classe</h3>
+
+                    <table>
+
+                      <thead>
+
+                        <tr>
+
+                          <th>Classe</th>
+
+                          <th>Precision</th>
+
+                          <th>Recall</th>
+
+                          <th>F1</th>
+
+                          <th>Support</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        <% ["fake","true"].forEach(label=>{ %>
+
+                          <tr>
+
+                            <td>
+                              <%= label.toUpperCase() %>
+                            </td>
+
+                            <td>
+                              <%= (evaluationResult.perClass[label].precision*100).toFixed(2) %>%
+                            </td>
+
+                            <td>
+                              <%= (evaluationResult.perClass[label].recall*100).toFixed(2) %>%
+                            </td>
+
+                            <td>
+                              <%= (evaluationResult.perClass[label].f1*100).toFixed(2) %>%
+                            </td>
+
+                            <td>
+                              <%= evaluationResult.perClass[label].support %>
+                            </td>
+
+                          </tr>
+
+                          <% }) %>
+
+                      </tbody>
+
+                    </table>
+
+                    <hr>
+
+                    <h3>Médias Gerais</h3>
+
+                    <div class="metrics">
+
+                      <div class="metric">
+
+                        <span>Macro Precision</span>
+
+                        <strong>
+                          <%= (evaluationResult.macroAverage.precision*100).toFixed(2) %>%
+                        </strong>
+
+                      </div>
+
+                      <div class="metric">
+
+                        <span>Macro Recall</span>
+
+                        <strong>
+                          <%= (evaluationResult.macroAverage.recall*100).toFixed(2) %>%
+                        </strong>
+
+                      </div>
+
+                      <div class="metric">
+
+                        <span>Macro F1</span>
+
+                        <strong>
+                          <%= (evaluationResult.macroAverage.f1*100).toFixed(2) %>%
+                        </strong>
+
+                      </div>
+
+                      <div class="metric">
+
+                        <span>Weighted Precision</span>
+
+                        <strong>
+                          <%= (evaluationResult.weightedAverage.precision*100).toFixed(2) %>%
+                        </strong>
+
+                      </div>
+
+                      <div class="metric">
+
+                        <span>Weighted Recall</span>
+
+                        <strong>
+                          <%= (evaluationResult.weightedAverage.recall*100).toFixed(2) %>%
+                        </strong>
+
+                      </div>
+
+                      <div class="metric">
+
+                        <span>Weighted F1</span>
+
+                        <strong>
+                          <%= (evaluationResult.weightedAverage.f1*100).toFixed(2) %>%
+                        </strong>
+
+                      </div>
+
+                    </div>
+
+                    <hr>
+
+                    <h3>Tempos de Execução</h3>
+
+                    <div class="metrics">
+
+                      <div class="metric">
+
+                        <span>Treino</span>
+
+                        <strong>
+                          <%= evaluationResult.timings.modelTrainingTimeMs.toFixed(2) %> ms
+                        </strong>
+
+                      </div>
+
+                      <div class="metric">
+
+                        <span>Classificação média</span>
+
+                        <strong>
+                          <%= evaluationResult.timings.averageClassificationTimeMs.toFixed(2) %> ms
+                        </strong>
+
+                      </div>
+
+                      <div class="metric">
+
+                        <span>Avaliação completa</span>
+
+                        <strong>
+                          <%= evaluationResult.timings.totalEvaluationTimeMs.toFixed(2) %> ms
+                        </strong>
+
+                      </div>
+
+                    </div>
+
+                    <hr>
+
+                    <h3>20 Características Mais Importantes</h3>
+
+                    <div class="terms">
+
+                      <% evaluationResult.topSelectedFeatures.forEach(feature=>{ %>
+
+                        <span class="tag info">
+
+                          <%= feature.term %>
+
+                            (<%= feature.score.toFixed(2) %>)
+
+                        </span>
+
+                        <% }) %>
+
+                    </div>
+
+                    <hr>
+
+                    <h3>Distribuição do Dataset</h3>
+
+                    <table>
+
+                      <thead>
+
+                        <tr>
+
+                          <th>Classe</th>
+
+                          <th>Total</th>
+
+                          <th>Treino</th>
+
+                          <th>Teste</th>
+
+                        </tr>
+
+                      </thead>
+
+                      <tbody>
+
+                        <% Object.keys(evaluationResult.dataset.distribution).forEach(label=>{ %>
+
+                          <tr>
+
+                            <td>
+                              <%= label.toUpperCase() %>
+                            </td>
+
+                            <td>
+                              <%= evaluationResult.dataset.distribution[label].total %>
+                            </td>
+
+                            <td>
+                              <%= evaluationResult.dataset.distribution[label].training %>
+                            </td>
+
+                            <td>
+                              <%= evaluationResult.dataset.distribution[label].test %>
+                            </td>
+
+                          </tr>
+
+                          <% }) %>
+
+                      </tbody>
+
+                    </table>
+<hr>
+
+<h3>Resumo das previsões</h3>
+
+<div class="metrics">
+
+  <div class="metric">
+    <span>Total de previsões</span>
+
+    <strong>
+      <%= evaluationResult.summary.totalPredictions %>
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Confiança média</span>
+
+    <strong>
+      <%= evaluationResult.summary.averageConfidencePercentage.toFixed(2) %>%
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Confiança média dos acertos</span>
+
+    <strong>
+      <%= evaluationResult.summary.averageCorrectConfidencePercentage.toFixed(2) %>%
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Confiança média dos erros</span>
+
+    <strong>
+      <%= evaluationResult.summary.averageIncorrectConfidencePercentage.toFixed(2) %>%
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Cobertura média do vocabulário</span>
+
+    <strong>
+      <%= evaluationResult.summary.averageVocabularyCoveragePercentage.toFixed(2) %>%
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Tempo total de classificação</span>
+
+    <strong>
+      <%= evaluationResult.timings.totalClassificationTimeMs.toFixed(2) %> ms
+    </strong>
+  </div>
+
+</div>
+
+<hr>
+
+<h3>Exemplos classificados corretamente</h3>
+
+<p class="small">
+  Exemplos retirados do conjunto de teste em que a classe prevista
+  correspondeu à classe real.
+</p>
+
+<% if (
+  evaluationResult.examples &&
+  evaluationResult.examples.correct &&
+  evaluationResult.examples.correct.length > 0
+) { %>
+
+  <div style="overflow-x: auto;">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Classe real</th>
+          <th>Classe prevista</th>
+          <th>Confiança</th>
+          <th>Cobertura</th>
+          <th>Tempo</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% evaluationResult.examples.correct.forEach((item) => { %>
+
+          <tr>
+
+            <td style="text-align: left;">
+              <%= item.title %>
+            </td>
+
+            <td class="<%= item.actual %>">
+              <strong>
+                <%= item.actual.toUpperCase() %>
+              </strong>
+            </td>
+
+            <td class="<%= item.predicted %>">
+              <strong>
+                <%= item.predicted.toUpperCase() %>
+              </strong>
+            </td>
+
+            <td>
+              <%= item.confidencePercentage.toFixed(2) %>%
+            </td>
+
+            <td>
+              <%= item.vocabularyCoveragePercentage.toFixed(2) %>%
+            </td>
+
+            <td>
+              <%= item.processingTimeMs.toFixed(2) %> ms
+            </td>
+
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+<% } else { %>
+
+  <p>
+    Nenhum exemplo corretamente classificado está disponível.
+  </p>
+
+<% } %>
+
+<hr>
+
+<h3>Exemplos classificados incorretamente</h3>
+
+<p class="small">
+  Estes casos ajudam a perceber onde o modelo ainda apresenta
+  dificuldades e quais notícias poderiam ser acrescentadas ao treino.
+</p>
+
+<% if (
+  evaluationResult.examples &&
+  evaluationResult.examples.incorrect &&
+  evaluationResult.examples.incorrect.length > 0
+) { %>
+
+  <div style="overflow-x: auto;">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Classe real</th>
+          <th>Classe prevista</th>
+          <th>Confiança</th>
+          <th>Cobertura</th>
+          <th>Termos reconhecidos</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% evaluationResult.examples.incorrect.forEach((item) => { %>
+
+          <tr>
+
+            <td style="text-align: left;">
+              <%= item.title %>
+            </td>
+
+            <td class="<%= item.actual %>">
+              <strong>
+                <%= item.actual.toUpperCase() %>
+              </strong>
+            </td>
+
+            <td class="<%= item.predicted %>">
+              <strong>
+                <%= item.predicted.toUpperCase() %>
+              </strong>
+            </td>
+
+            <td>
+              <%= item.confidencePercentage.toFixed(2) %>%
+            </td>
+
+            <td>
+              <%= item.vocabularyCoveragePercentage.toFixed(2) %>%
+            </td>
+
+            <td>
+              <%= item.recognizedTermsCount %>
+            </td>
+
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+<% } else { %>
+
+  <div class="message success" style="margin-top: 16px;">
+    O modelo não apresentou erros nos exemplos selecionados.
+  </div>
+
+<% } %>
+
+<hr>
+
+<h3>Previsões com maior confiança</h3>
+
+<% if (
+  evaluationResult.examples &&
+  evaluationResult.examples.highestConfidence &&
+  evaluationResult.examples.highestConfidence.length > 0
+) { %>
+
+  <div style="overflow-x: auto;">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Classe real</th>
+          <th>Classe prevista</th>
+          <th>Confiança</th>
+          <th>Resultado</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% evaluationResult.examples.highestConfidence
+          .slice(0, 5)
+          .forEach((item) => { %>
+
+          <tr>
+
+            <td style="text-align: left;">
+              <%= item.title %>
+            </td>
+
+            <td>
+              <%= item.actual.toUpperCase() %>
+            </td>
+
+            <td>
+              <%= item.predicted.toUpperCase() %>
+            </td>
+
+            <td>
+              <%= item.confidencePercentage.toFixed(2) %>%
+            </td>
+
+            <td>
+              <% if (item.correct) { %>
+                <span class="tag good">
+                  Correto
+                </span>
+              <% } else { %>
+                <span class="tag bad">
+                  Incorreto
+                </span>
+              <% } %>
+            </td>
+
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+<% } %>
+
+<hr>
+
+<h3>Previsões com menor confiança</h3>
+
+<p class="small">
+  Estas são as previsões em que as probabilidades entre Fake e True
+  ficaram mais próximas.
+</p>
+
+<% if (
+  evaluationResult.examples &&
+  evaluationResult.examples.lowestConfidence &&
+  evaluationResult.examples.lowestConfidence.length > 0
+) { %>
+
+  <div style="overflow-x: auto;">
+
+    <table>
+
+      <thead>
+        <tr>
+          <th>Título</th>
+          <th>Classe real</th>
+          <th>Classe prevista</th>
+          <th>Confiança</th>
+          <th>Resultado</th>
+        </tr>
+      </thead>
+
+      <tbody>
+
+        <% evaluationResult.examples.lowestConfidence
+          .slice(0, 5)
+          .forEach((item) => { %>
+
+          <tr>
+
+            <td style="text-align: left;">
+              <%= item.title %>
+            </td>
+
+            <td>
+              <%= item.actual.toUpperCase() %>
+            </td>
+
+            <td>
+              <%= item.predicted.toUpperCase() %>
+            </td>
+
+            <td>
+              <%= item.confidencePercentage.toFixed(2) %>%
+            </td>
+
+            <td>
+              <% if (item.correct) { %>
+                <span class="tag good">
+                  Correto
+                </span>
+              <% } else { %>
+                <span class="tag bad">
+                  Incorreto
+                </span>
+              <% } %>
+            </td>
+
+          </tr>
+
+        <% }) %>
+
+      </tbody>
+
+    </table>
+
+  </div>
+
+<% } %>
+
+<hr>
+
+<h3>Configuração da avaliação</h3>
+
+<div class="metrics">
+
+  <div class="metric">
+    <span>Algoritmo</span>
+
+    <strong style="font-size: 18px;">
+      <%= evaluationResult.algorithm %>
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Proporção de treino</span>
+
+    <strong>
+      <%= (evaluationResult.configuration.trainingRatio * 100).toFixed(0) %>%
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Proporção de teste</span>
+
+    <strong>
+      <%= (evaluationResult.configuration.testRatio * 100).toFixed(0) %>%
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Máximo de características</span>
+
+    <strong>
+      <%= evaluationResult.configuration.maxFeatures %>
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>N-gramas utilizados</span>
+
+    <strong>
+      <%= evaluationResult.configuration.ngramSizes.join(", ") %>
+    </strong>
+  </div>
+
+  <div class="metric">
+    <span>Suavização de Laplace</span>
+
+    <strong>
+      <%= evaluationResult.configuration.laplaceSmoothing %>
+    </strong>
+  </div>
+
+</div>
+                  </section>
+
+                  <% } %>
   </main>
+  <script>
+    document.querySelectorAll(".progress-bar").forEach(bar => {
+      const width = bar.dataset.width;
+
+      if (width) {
+        bar.style.width = width + "%";
+      }
+    });
+  </script>
 </body>
+
 </html>
